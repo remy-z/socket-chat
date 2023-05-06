@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/websocket"
 )
@@ -15,6 +16,16 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		conns: make(map[*websocket.Conn]bool),
+	}
+}
+
+func (s *Server) exampleFeed(ws *websocket.Conn) {
+	fmt.Println("new connection from client to feed:", ws.RemoteAddr())
+
+	for {
+		payload := fmt.Sprintf("Just saying hi to all my clients <3 at -> %d\n", time.Now().UnixNano())
+		ws.Write([]byte(payload))
+		time.Sleep(time.Second * 2)
 	}
 }
 
@@ -39,14 +50,24 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 			continue // returning would drop the connection
 		}
 		msg := buf[:n]
-		fmt.Println(string(msg))
-		ws.Write([]byte("nice message!"))
+		s.broadcast(msg)
 	}
 
+}
+
+func (s *Server) broadcast(b []byte) {
+	for ws := range s.conns {
+		go func(ws *websocket.Conn) {
+			if _, err := ws.Write(b); err != nil {
+				fmt.Println("error", err)
+			}
+		}(ws)
+	}
 }
 
 func main() {
 	server := NewServer()
 	http.Handle("/ws", websocket.Handler(server.handleWS))
+	http.Handle("/examplefeed", websocket.Handler(server.exampleFeed))
 	http.ListenAndServe(":3000", nil)
 }
