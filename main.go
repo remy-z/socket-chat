@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"time"
+	"log"
 
 	"golang.org/x/net/websocket"
 )
@@ -76,5 +77,5 @@ func main() {
 	server := NewServer()
 	http.Handle("/ws", allowCORS(websocket.Handler(server.handleWS)))
 	http.Handle("/examplefeed", allowCORS(websocket.Handler(server.exampleFeed)))
-	http.ListenAndServe(":3000", nil)
+	log.Fatal(http.ListenAndServe(":3000", nil))
 }
