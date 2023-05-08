@@ -76,5 +76,5 @@ func main() {
 	server := NewServer()
 	http.Handle("/ws", allowCORS(websocket.Handler(server.handleWS)))
 	http.Handle("/examplefeed", allowCORS(websocket.Handler(server.exampleFeed)))
-	http.ListenAndServe(":3000", nil)
+	http.ListenAndServe(":8080", nil)
 }

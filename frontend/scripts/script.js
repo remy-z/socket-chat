@@ -1,10 +1,14 @@
-let socket = new WebSocket("ws://localhost:3000/ws")
+let socket = new WebSocket("ws://localhost:8080/ws")
 socket.onmessage = (event) => {
-    console.log("Recieved from the server:", event.data)
+    const el = document.createElement('li');
+    el.innerHTML = event.data;
+    document.querySelector('ul').appendChild(el)
 }
 
+document.querySelector('button').onclick = () => {
 
-var button = document.getElementById("sender");
-button.addEventListener("click", function (event) {
-    socket.send("Client says hello");
-});
+    const text = document.querySelector('input').value;
+    socket.send(text)
+
+}
+
