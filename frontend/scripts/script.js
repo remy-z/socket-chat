@@ -1,4 +1,4 @@
-let socket = new WebSocket("ws://localhost:8080/ws")
+let socket = new WebSocket("ws://localhost:3000/ws")
 socket.onmessage = (event) => {
     const el = document.createElement('li');
     el.innerHTML = event.data;
