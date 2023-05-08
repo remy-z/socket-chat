@@ -7,3 +7,5 @@ In one terminal host go ws server:
 In another terminal host simple http with python:
     navigate to /frontend
     python -m http.server
+
+ngrok http 8000
