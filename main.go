@@ -65,9 +65,16 @@ func (s *Server) broadcast(b []byte) {
 	}
 }
 
+func allowCORS(h http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		h.ServeHTTP(w, r)
+	})
+}
+
 func main() {
 	server := NewServer()
-	http.Handle("/ws", websocket.Handler(server.handleWS))
-	http.Handle("/examplefeed", websocket.Handler(server.exampleFeed))
+	http.Handle("/ws", allowCORS(websocket.Handler(server.handleWS)))
+	http.Handle("/examplefeed", allowCORS(websocket.Handler(server.exampleFeed)))
 	http.ListenAndServe(":3000", nil)
 }
