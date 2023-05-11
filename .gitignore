@@ -20,5 +20,6 @@
 # Go workspace file
 go.work
 
-# Log files from server
-*.log
+#https certificate things
+*.crt
+*.key
