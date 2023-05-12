@@ -22,6 +22,7 @@ func NewRetentionMap(ctx context.Context, retentionPeriod time.Duration) Retenti
 	return rm
 }
 
+// generate a new OTP to return to user
 func (rm RetentionMap) NewOTP() OTP {
 	otp := OTP{
 		Key:     uuid.NewString(),
@@ -32,6 +33,7 @@ func (rm RetentionMap) NewOTP() OTP {
 	return otp
 }
 
+// check retention map to see if otp exists, delete if it does
 func (rm RetentionMap) VerifyOTP(otp string) bool {
 	// Verify OTP is existing
 	if _, ok := rm[otp]; !ok {
@@ -42,6 +44,7 @@ func (rm RetentionMap) VerifyOTP(otp string) bool {
 	return true
 }
 
+// every 500 ms check the retention map, and remove expired otps
 func (rm RetentionMap) Retention(ctx context.Context, retentionPeriod time.Duration) {
 	ticker := time.NewTicker(500 * time.Millisecond)
 

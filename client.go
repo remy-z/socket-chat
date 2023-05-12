@@ -11,42 +11,46 @@ import (
 var (
 	pongWait     = 10 * time.Second
 	pingInterval = (pongWait * 9) / 10
+	startingRoom = "general"
 )
-
-type ClientList map[*Client]bool
 
 type Client struct {
 	connection *websocket.Conn
 	manager    *Manager
-
-	chatroom string
-	//egress to avoid concurrent writes
-	egress chan Event
+	egress     chan Event //egress to avoid concurrent writes
+	chatroom   string
 }
 
 func NewClient(conn *websocket.Conn, manager *Manager) *Client {
-	return &Client{
+	c := &Client{
 		connection: conn,
 		manager:    manager,
 		egress:     make(chan Event),
+		chatroom:   startingRoom,
 	}
+
+	c.setupClient()
+	return c
 }
 
-func (c *Client) readMessages() {
-	defer func() {
-		//cleanup connection when connection breaks
-		c.manager.removeClient(c)
-	}()
-
+func (c *Client) setupClient() {
 	err := c.connection.SetReadDeadline(time.Now().Add(pongWait))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
+	//No Jumbo Frames!
 	c.connection.SetReadLimit(512)
 
 	c.connection.SetPongHandler(c.pongHandler)
+}
+
+// Event loop for reading incoming messages from client on websocket connection
+func (c *Client) readMessages() {
+	defer func() {
+		c.manager.removeClient(c)
+	}()
 
 	for {
 		_, payload, err := c.connection.ReadMessage()
@@ -65,11 +69,12 @@ func (c *Client) readMessages() {
 		}
 
 		if err := c.manager.routeEvent(request, c); err != nil {
-			fmt.Println("error handeling message: ", err)
+			fmt.Println("error handling message: ", err)
 		}
 	}
 }
 
+// Event loop for sending pings and messages to client
 func (c *Client) writeMessages() {
 	defer func() {
 		c.manager.removeClient(c)
@@ -78,7 +83,10 @@ func (c *Client) writeMessages() {
 	ticker := time.NewTicker(pingInterval)
 	for {
 		select {
+
+		//write message to websocket connection whenever a messages comes from egress channel
 		case message, ok := <-c.egress:
+
 			if !ok {
 				//Server write message to client when server has egress issues that connection has to be closed
 				if err := c.connection.WriteMessage(websocket.CloseMessage, nil); err != nil {
@@ -98,9 +106,8 @@ func (c *Client) writeMessages() {
 			}
 			fmt.Println("message sent")
 
+			//Send a ping to client whenever there is an incoming tick
 		case <-ticker.C:
-			fmt.Println("ping")
-
 			err := c.connection.WriteMessage(websocket.PingMessage, []byte(``))
 			if err != nil {
 				fmt.Println("write message err: ", err)
@@ -111,7 +118,7 @@ func (c *Client) writeMessages() {
 }
 
 func (c *Client) pongHandler(pongMsg string) error {
-	fmt.Println("pong")
+	//fmt.Println("pong")
 	//reset timer when pong recieved
 	return c.connection.SetReadDeadline(time.Now().Add(pongWait))
 }

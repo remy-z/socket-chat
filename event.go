@@ -5,13 +5,7 @@ import (
 	"time"
 )
 
-type Event struct {
-	Type    string          `json:"type"`
-	Payload json.RawMessage `json:"payload"`
-}
-
-type EventHandler func(event Event, c *Client) error
-
+// constants for routing on both front and backend
 // naming is from the client viewpoint
 // send_message are messages sent by client, recieved by server
 // recieve_message are messages recieved by client, sent by server
@@ -21,16 +15,23 @@ const (
 	EventChangeRoom     = "change_room"
 )
 
+type Event struct {
+	Type    string          `json:"type"`
+	Payload json.RawMessage `json:"payload"`
+}
+
+type EventHandler func(event Event, c *Client) error
+
 type SendMessageEvent struct {
 	Message string `json:"message"`
-	From    string `json"from"`
+	From    string `json:"from"`
 }
 
 type RecieveMessageEvent struct {
 	SendMessageEvent
-	Sent time.Time `json"sent"`
+	Sent time.Time `json:"sent"`
 }
 
 type ChangeRoomEvent struct {
-	Name string `json"name"`
+	Name string `json:"name"`
 }

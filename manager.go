@@ -29,6 +29,8 @@ type Manager struct {
 	handlers map[string]EventHandler
 }
 
+type ClientList map[*Client]bool
+
 func NewManager(ctx context.Context) *Manager {
 	m := &Manager{
 		clients:  make(ClientList),
@@ -40,24 +42,32 @@ func NewManager(ctx context.Context) *Manager {
 	return m
 }
 
+// handlers stored in a map to route events to the correct handler
+// based on event type (using m.routeEvent)
 func (m *Manager) setupEventhandlers() {
-	m.handlers[EventSendMessage] = SendMessage
-	m.handlers[EventChangeRoom] = ChatRoomHandler
+
+	m.handlers[EventSendMessage] = SendMessageHandler
+	m.handlers[EventChangeRoom] = ChangeRoomHandler
 
 }
 
-func ChatRoomHandler(event Event, c *Client) error {
-	var changeRoomEvent ChangeRoomEvent
-	err := json.Unmarshal(event.Payload, &changeRoomEvent)
-	if err != nil {
-		return fmt.Errorf("bad payload in request: %v", err)
+// Route events triggered from the client sending messages through websocket
+func (m *Manager) routeEvent(event Event, c *Client) error {
+	//check if event type is included in handlers
+	if handler, ok := m.handlers[event.Type]; ok {
+		if err := handler(event, c); err != nil {
+			return err
+		}
+		return nil
+	} else {
+		return errors.New("event type not found")
 	}
-
-	c.chatroom = changeRoomEvent.Name
-	return nil
 }
 
-func SendMessage(event Event, c *Client) error {
+// Envoked when a client sends an event with type EventSendMessage
+// TODO write message to DB and save in recent queue
+// Broadcast to other clients in the same room
+func SendMessageHandler(event Event, c *Client) error {
 	var chatevent SendMessageEvent
 
 	err := json.Unmarshal(event.Payload, &chatevent)
@@ -76,12 +86,12 @@ func SendMessage(event Event, c *Client) error {
 		return fmt.Errorf("failed to marshal broadcast message: %v", err)
 	}
 
-	fmt.Println(data)
 	outgoingEvent := Event{
 		Payload: data,
 		Type:    EventRecieveMessage,
 	}
 
+	//write messages to egress channel on clients
 	for client := range c.manager.clients {
 		if client.chatroom == c.chatroom {
 			client.egress <- outgoingEvent
@@ -91,18 +101,19 @@ func SendMessage(event Event, c *Client) error {
 	return nil
 }
 
-func (m *Manager) routeEvent(event Event, c *Client) error {
-	//check if event type is included in handlers
-	if handler, ok := m.handlers[event.Type]; ok {
-		if err := handler(event, c); err != nil {
-			return err
-		}
-		return nil
-	} else {
-		return errors.New("event type not found")
+// Envoked when a client sends an event with type EventChangeRoom
+func ChangeRoomHandler(event Event, c *Client) error {
+	var changeRoomEvent ChangeRoomEvent
+	err := json.Unmarshal(event.Payload, &changeRoomEvent)
+	if err != nil {
+		return fmt.Errorf("bad payload in request: %v", err)
 	}
+
+	c.chatroom = changeRoomEvent.Name
+	return nil
 }
 
+// http request handler for /ws, upgrades connection to websocket
 func (m *Manager) serveWS(w http.ResponseWriter, r *http.Request) {
 	//verify OTP
 	otp := r.URL.Query().Get("otp")
@@ -128,16 +139,12 @@ func (m *Manager) serveWS(w http.ResponseWriter, r *http.Request) {
 	m.addClient(client)
 
 	// Start read and write go routines
-
 	go client.readMessages()
 	go client.writeMessages()
 }
 
+// http handler that is set in main.go to authenticate login requests form client
 func (m *Manager) loginHandler(w http.ResponseWriter, r *http.Request) {
-	type userLoginRequest struct {
-		Username string `json:"username"`
-		Password string `json:"password"`
-	}
 
 	var req userLoginRequest
 
@@ -147,14 +154,11 @@ func (m *Manager) loginHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	//TODO real authentification stuff here
 	if req.Username == "test" && req.Password == "123" {
-		type response struct {
-			OTP string `json:"otp"`
-		}
-
 		otp := m.otps.NewOTP()
 
-		resp := response{
+		resp := otpResponse{
 			OTP: otp.Key,
 		}
 
@@ -172,6 +176,8 @@ func (m *Manager) loginHandler(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusUnauthorized)
 }
 
+// add client to manager's ClientList
+// add client to chatroom map
 func (m *Manager) addClient(client *Client) {
 	m.Lock()
 	defer m.Unlock()
@@ -179,6 +185,7 @@ func (m *Manager) addClient(client *Client) {
 	m.clients[client] = true
 }
 
+// close the client's connection and remove client from memory
 func (m *Manager) removeClient(client *Client) {
 	m.Lock()
 	defer m.Unlock()
@@ -189,16 +196,14 @@ func (m *Manager) removeClient(client *Client) {
 	}
 }
 
-// return to true to allow connection, false to dismiss
+// return true to allow connection, false to dismiss
 func checkOrigin(r *http.Request) bool {
-	return true
-	/*origin := r.Header.Get("Origin")
+	origin := r.Header.Get("Origin")
 
 	switch origin {
-	case "http://localhost:8080":
+	case "https://localhost:8080":
 		return true
 	default:
 		return false
 	}
-	*/
 }

@@ -1,1 +1,5 @@
-
+Websocket events: 
+    close
+    error
+    message
+    open
