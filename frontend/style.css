@@ -4,12 +4,43 @@ body {
     margin: 0;
     width: 100%;
     height: 100%;
-    background: rgb(214, 209, 244);
+    background: rgb(16, 16, 16);
+    color: whitesmoke;
+    font-family: 'Courier New', Courier, monospace;
 }
 
-.center {
-    margin: auto;
-    width: 50%;
-    border: 3px solid rgb(55, 62, 167);
+.login-screen {
+    margin: 0 auto;
+    width: 90vw;
+    height: 100%;
     padding: 10px;
+    background: rgb(16, 16, 16);
+
+}
+
+.login-header {
+    margin: 0 auto;
+    width: 70%;
+    background: rgb(16, 16, 16);
+}
+
+h1 {
+    text-align: center;
+}
+
+h3 {
+    text-align: center;
+}
+
+.login-form {
+    margin: 0 auto;
+    width: 70%;
+}
+
+form#login-form {
+    text-align: center;
+}
+
+input {
+    font-family: 'Courier New', Courier, monospace;
 }
