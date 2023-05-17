@@ -1,4 +1,3 @@
-
 var selectedchat = "general";
 
 // what we will be sending and recieveing trhough websocket
@@ -107,7 +106,9 @@ function login() {
     }).then((data) => {
         //we are authenticated
         connectWebSocket(data.otp)
+        loadChatPage()
     }).catch((e) => { alert(e) });
+
 
     return false;
 }
@@ -140,9 +141,13 @@ function connectWebSocket(otp) {
     }
 }
 
+function loadChatPage() {
+    document.getElementById("login-screen").style.visibility = "hidden";
+    document.getElementById("chat-screen").style.visibility = "visible";
+}
 window.onload = function () {
-    document.getElementById("chatroom-selection").onsubmit = changeChatRoom;
-    document.getElementById("chatroom-message").onsubmit = sendMessage;
+    //document.getElementById("chatroom-selection").onsubmit = changeChatRoom;
+    //document.getElementById("chatroom-message").onsubmit = sendMessage;
     document.getElementById("login-form").onsubmit = login;
 
 }
