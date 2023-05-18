@@ -66,12 +66,12 @@ function appendChatMessage(messageEvent) {
     var date = new Date().toLocaleString()
 
     messageContainer = document.getElementById("message-container");
-    message = messageDivBuilder(messageEvent.from, messageEvent.message, date);
+    message = messageBuilder(messageEvent.from, messageEvent.message, date);
     messageContainer.appendChild(message);
 }
 
 // returns a div with class message to be appended to the message container
-function messageDivBuilder(name, message, date) {
+function messageBuilder(from, message, date) {
     var div = document.createElement('div');
     div.className = 'message';
 
@@ -80,7 +80,7 @@ function messageDivBuilder(name, message, date) {
 
     var span = document.createElement('span');
     span.className = 'msg nameplate';
-    span.textContent = `${name}: `;
+    span.textContent = `${from}: `;
 
     var messageText = document.createTextNode(message)
 
@@ -98,6 +98,26 @@ function messageDivBuilder(name, message, date) {
     return div
 }
 
+function welcomeMessageBuilder() {
+    var div = document.createElement('div');
+    div.className = 'message';
+
+    var p1 = document.createElement('p');
+    p1.className = 'msg message-body';
+
+    var span = document.createElement('span');
+    span.className = 'msg nameplate';
+
+    var messageText = document.createTextNode("Welcome to Socket-Chat!")
+
+    p1.appendChild(span);
+    p1.appendChild(messageText);
+
+    div.appendChild(p1);
+
+    return div
+}
+
 function sendEvent(eventName, payload) {
     const event = new Event(eventName, payload)
 
@@ -105,12 +125,16 @@ function sendEvent(eventName, payload) {
 }
 
 function sendMessage() {
-    var message = document.getElementById("message-input");
+    input = document.getElementById("message-input");
+    var message = input;
+    console.log(input)
     if (message != null) {
         //TODO allow username login 
         let outgoingEvent = new SendMessageEvent(message.value, username);
         sendEvent("send_message", outgoingEvent)
     }
+    input.value = "";
+
     return false;
 }
 
@@ -136,8 +160,6 @@ function login() {
         connectWebSocket(data.otp)
         loadChatPage()
     }).catch((e) => { alert(e) });
-
-
     return false;
 }
 
@@ -173,8 +195,9 @@ function connectWebSocket(otp) {
 window.onload = function () {
     //document.getElementById("chatroom-selection").onsubmit = changeChatRoom;
     document.getElementById("login-form").onsubmit = login;
-    document.getElementById("send-message").onsubmit = sendMessage;
 
+
+    document.getElementById("username").focus()
 }
 
 function loadChatPage() {
@@ -184,5 +207,26 @@ function loadChatPage() {
         elements[i].classList.toggle("hide");
     }
     //load messages 
+    messageContainer = document.getElementById("message-container")
+    messageContainer.appendChild(welcomeMessageBuilder())
     //focus on input
+    input = document.getElementById("message-input")
+    form = document.getElementById("send-message")
+
+
+    // send message on enter keypress
+    input.addEventListener('keypress', function (event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            sendMessage()
+        }
+    });
+    form.addEventListener('submit', function (event) {
+        event.preventDefault(); // Prevent form submission
+        sendMessage()
+        input.focus()
+    });
+
+    input.focus()
 }
+
