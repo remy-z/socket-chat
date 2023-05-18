@@ -68,6 +68,7 @@ function appendChatMessage(messageEvent) {
     messageContainer = document.getElementById("message-container");
     message = messageBuilder(messageEvent.from, messageEvent.message, date);
     messageContainer.appendChild(message);
+    messageContainer.scrollTop = messageContainer.scrollHeight;
 }
 
 // returns a div with class message to be appended to the message container
@@ -127,7 +128,6 @@ function sendEvent(eventName, payload) {
 function sendMessage() {
     input = document.getElementById("message-input");
     var message = input;
-    console.log(input)
     if (message != null) {
         //TODO allow username login 
         let outgoingEvent = new SendMessageEvent(message.value, username);
