@@ -11,235 +11,37 @@
 
 <body>
     <div class="wrapper">
-        <div id="login-screen">
-            <div class="login-header">
-                <h1>Socket-Chat</h1>
-                <h2>...Login...</h2>
+        <div class="login" id="login-header">
+            <h1 class="">Socket-Chat</h1>
+            <h2>...Login...</h2>
+        </div>
+        <form class="login" id="login-form">
+            <label for="username">username:</label>
+            <input type="text" id="username" name="username"><br>
+            <label for="password">password:</label>
+            <input type="password" id="password" name="password"><br><br>
+            <input type="submit" value="Login">
+        </form>
+        <div id="message-container" class="chat hide">
+            <!-- SAMPLE MESSAGE FORMAT
+            <div class="message">
+                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo Thisismy
+                    test message yo yo yo This is my test ge yo yo yo This is my test message yo yo yo This is my
+                    test
+                    message yo yo yo</p>
+                <p class="msg timestamp">05/17/2023 1:55pm</p>
             </div>
-            <div class="login">
-                <form id="login-form">
-                    <label for="username">username:</label>
-                    <input type="text" id="username" name="username"><br>
-                    <label for="password">password:</label>
-                    <input type="password" id="password" name="password"><br><br>
-                    <input type="submit" value="Login">
-                </form>
-            </div>
+            -->
+
         </div>
 
-        <div id="message-container">
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This is my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-            <div class="message">
-                <p class=" msg message-body"><span class="msg nameplate">Remy: </span>st message yo yo yo This
-                    is
-                    my
-                    test
-                    message yo yo yo This is my test
-                    message yo yo yo This is my test message yo yo yo This is my test message yo yo yo</p>
-                <p class="msg timestamp">05/17/2023 1:55pm</p>
-            </div>
-        </div>
-        <div id="input" class="input">
+        <div id="input" class="chat hide input">
             <form id="send-message">
                 <label for="message" id="chatroom-label">WS:\General></label>
                 <input type="text" id="message-input" name="message">
                 <input type="submit" value=">" id="message-submit">
             </form>
         </div>
-
     </div>
 
     <script src="script.js"></script>
