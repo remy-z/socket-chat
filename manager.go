@@ -155,7 +155,7 @@ func (m *Manager) loginHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	//TODO real authentification stuff here
-	if req.Username == "test" && req.Password == "123" {
+	if req.Password == "123" {
 		otp := m.otps.NewOTP()
 
 		resp := otpResponse{

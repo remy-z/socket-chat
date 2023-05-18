@@ -19,48 +19,33 @@ body {
 
 /*grid wrapper */
 .wrapper {
-    margin: 0 auto;
     height: 100%;
     width: 100%;
+    margin: 0 auto;
+    border: 0.1vw solid grey;
+
     display: grid;
     grid-template-columns: repeat(9, 1fr);
     grid-template-rows: repeat(8, 2fr) repeat(2, 1fr);
-    visibility: visible;
-
     gap: 0.5vw;
 }
 
-/* login page */
-#login-screen {
+.hide {
     visibility: hidden;
-    margin: 0 auto;
-    grid-column: 4 / 7;
-    grid-row: 2/ 4;
+}
 
+/* login page */
+
+#login-header {
+    grid-column: 3 / 8;
+    grid-row: 2 / 3;
     background: rgb(16, 16, 16);
-
-}
-
-.login-header {
-    margin: 0 auto;
-    width: 70%;
-    background: rgb(16, 16, 16);
-}
-
-h1 {
     text-align: center;
-}
-
-h2 {
-    text-align: center;
-}
-
-.login-form {
-    margin: 0 auto;
-    width: 70%;
 }
 
 form#login-form {
+    grid-column: 4 / 7;
+    grid-row: 3 / 4;
     text-align: center;
 }
 
@@ -69,6 +54,7 @@ input {
 }
 
 /* main chat page */
+
 
 /*message display */
 #message-container {
@@ -109,6 +95,7 @@ input {
 .timestamp {
     grid-column: 2 / 3;
     text-align: right;
+    margin-right: 0.5vw;
 }
 
 
@@ -143,4 +130,8 @@ input {
     line-height: 25px;
     background-color: transparent;
     flex-grow: 1;
+}
+
+#message-submit {
+    margin-right: 0.5vw;
 }

@@ -1,4 +1,5 @@
 var selectedchat = "general";
+var username = "guest";
 
 // what we will be sending and recieveing trhough websocket
 class Event {
@@ -62,13 +63,39 @@ function routeEvent(event) {
 }
 
 function appendChatMessage(messageEvent) {
-    var date = new Date()
-    console.log(date)
-    const formattedMsg = `${date.toLocaleString()}: ${messageEvent.message}`
+    var date = new Date().toLocaleString()
 
-    textarea = document.getElementById('chatmessages')
-    textarea.innerHTML = textarea.innerHTML + "\n" + formattedMsg;
-    textarea.scrollTop = textarea.scrollHeight;
+    messageContainer = document.getElementById("message-container");
+    message = messageDivBuilder(messageEvent.from, messageEvent.message, date);
+    messageContainer.appendChild(message);
+}
+
+// returns a div with class message to be appended to the message container
+function messageDivBuilder(name, message, date) {
+    var div = document.createElement('div');
+    div.className = 'message';
+
+    var p1 = document.createElement('p');
+    p1.className = 'msg message-body';
+
+    var span = document.createElement('span');
+    span.className = 'msg nameplate';
+    span.textContent = `${name}: `;
+
+    var messageText = document.createTextNode(message)
+
+    p1.appendChild(span);
+    p1.appendChild(messageText);
+
+    var p2 = document.createElement('p');
+    p2.className = 'msg timestamp';
+    p2.textContent = date;
+
+
+    div.appendChild(p1);
+    div.appendChild(p2);
+
+    return div
 }
 
 function sendEvent(eventName, payload) {
@@ -78,10 +105,10 @@ function sendEvent(eventName, payload) {
 }
 
 function sendMessage() {
-    var message = document.getElementById("message");
+    var message = document.getElementById("message-input");
     if (message != null) {
         //TODO allow username login 
-        let outgoingEvent = new SendMessageEvent(message.value, "test");
+        let outgoingEvent = new SendMessageEvent(message.value, username);
         sendEvent("send_message", outgoingEvent)
     }
     return false;
@@ -92,6 +119,7 @@ function login() {
         "username": document.getElementById("username").value,
         "password": document.getElementById("password").value
     }
+    username = formData["username"]
 
     fetch("login", {
         method: 'post',
@@ -120,11 +148,11 @@ function connectWebSocket(otp) {
         socket = new WebSocket("wss://" + document.location.host + "/ws?otp=" + otp)
 
         socket.onopen = function (event) {
-            document.getElementById("connection-header").innerHTML = "Connected to WebSocket: true";
+            console.log("socket-opened")
         }
 
         socket.onclose = function (event) {
-            document.getElementById("connection-header").innerHTML = "Connected to WebSocket: false";
+            console.log("socket-closed")
             // add automatic recconection unless it was manually closed by server
         }
 
@@ -141,13 +169,20 @@ function connectWebSocket(otp) {
     }
 }
 
-function loadChatPage() {
-    document.getElementById("login-screen").style.visibility = "hidden";
-    document.getElementById("chat-screen").style.visibility = "visible";
-}
+
 window.onload = function () {
     //document.getElementById("chatroom-selection").onsubmit = changeChatRoom;
-    //document.getElementById("chatroom-message").onsubmit = sendMessage;
     document.getElementById("login-form").onsubmit = login;
+    document.getElementById("send-message").onsubmit = sendMessage;
 
+}
+
+function loadChatPage() {
+    // hide login and display chat items
+    var elements = document.querySelectorAll(".login, .chat");
+    for (var i = 0; i < elements.length; i++) {
+        elements[i].classList.toggle("hide");
+    }
+    //load messages 
+    //focus on input
 }
