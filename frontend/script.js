@@ -167,7 +167,7 @@ function connectWebSocket(otp) {
     if (window["WebSocket"]) {
         console.log("supports websockets");
 
-        socket = new WebSocket("ws://" + document.location.host + "/ws?otp=" + otp)
+        socket = new WebSocket("wss://" + document.location.host + "/ws?otp=" + otp)
 
         socket.onopen = function (event) {
             console.log("socket-opened")
