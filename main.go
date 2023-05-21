@@ -4,12 +4,19 @@ import (
 	"context"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	setupServer()
 
-	log.Fatal(http.ListenAndServeTLS(":8080", "server.crt", "server.key", nil))
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Fatal(http.ListenAndServeTLS(":"+port, "server.crt", "server.key", nil))
 	//log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
