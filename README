@@ -5,5 +5,5 @@ make run
 and head to https://localhost/8080 to try it out
 
 currently there's no real authentification implemented, so to "login" just use 
-username: test
-password: 123  
+username: (anything you want)
+password: 123
