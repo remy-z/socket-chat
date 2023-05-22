@@ -26,18 +26,22 @@ type Manager struct {
 
 	otps RetentionMap
 
-	handlers map[string]EventHandler
+	handlers  map[string]EventHandler
+	chatrooms ChatRoomList
 }
 
 type ClientList map[*Client]bool
+type ChatRoomList map[string]ClientList
 
 func NewManager(ctx context.Context) *Manager {
 	m := &Manager{
-		clients:  make(ClientList),
-		handlers: make(map[string]EventHandler),
-		otps:     NewRetentionMap(ctx, 5*time.Second),
+		clients:   make(ClientList),
+		handlers:  make(map[string]EventHandler),
+		otps:      NewRetentionMap(ctx, 5*time.Second),
+		chatrooms: make(ChatRoomList),
 	}
 
+	m.chatrooms[startingRoom] = make(ClientList)
 	m.setupEventhandlers()
 	return m
 }
@@ -45,10 +49,9 @@ func NewManager(ctx context.Context) *Manager {
 // handlers stored in a map to route events to the correct handler
 // based on event type (using m.routeEvent)
 func (m *Manager) setupEventhandlers() {
-
 	m.handlers[EventSendMessage] = SendMessageHandler
 	m.handlers[EventChangeRoom] = ChangeRoomHandler
-
+	m.handlers[EventSendDir] = SendDirHandler
 }
 
 // Route events triggered from the client sending messages through websocket
@@ -92,11 +95,9 @@ func SendMessageHandler(event Event, c *Client) error {
 	}
 
 	//write messages to egress channel on clients
-	for client := range c.manager.clients {
-		if client.chatroom == c.chatroom {
-			client.egress <- outgoingEvent
-		}
 
+	for client := range c.manager.chatrooms[c.chatroom] {
+		client.egress <- outgoingEvent
 	}
 	return nil
 }
@@ -108,15 +109,32 @@ func ChangeRoomHandler(event Event, c *Client) error {
 	if err != nil {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
+	c.manager.moveClientRoom(c, changeRoomEvent.Name)
+	fmt.Println(c.manager.chatrooms)
+	return nil
+}
 
-	c.chatroom = changeRoomEvent.Name
+// Envoked when client sends a EventSendDir event, sends a response to client
+// with list of chatrooms and list of users in the client's current chatroom
+func SendDirHandler(event Event, c *Client) error {
+	var dirCommand SendDirEvent
+	err := json.Unmarshal(event.Payload, &dirCommand)
+	if err != nil {
+		return fmt.Errorf("bad payload in request: %v", err)
+	}
+
+	//var users []string
+	//var chats map[string]int
+
 	return nil
 }
 
 // http request handler for /ws, upgrades connection to websocket
 func (m *Manager) serveWS(w http.ResponseWriter, r *http.Request) {
 	//verify OTP
-	otp := r.URL.Query().Get("otp")
+	urlMap := r.URL.Query()
+
+	otp, username := urlMap.Get("otp"), urlMap.Get("username")
 	if otp == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -134,8 +152,7 @@ func (m *Manager) serveWS(w http.ResponseWriter, r *http.Request) {
 		fmt.Println(err)
 	}
 
-	client := NewClient(conn, m)
-
+	client := NewClient(conn, m, username)
 	m.addClient(client)
 
 	// Start read and write go routines
@@ -181,23 +198,45 @@ func (m *Manager) loginHandler(w http.ResponseWriter, r *http.Request) {
 func (m *Manager) addClient(client *Client) {
 	m.Lock()
 	defer m.Unlock()
-
+	m.chatrooms[startingRoom][client] = true
 	m.clients[client] = true
 }
 
-// close the client's connection and remove client from memory
+// move client from previous chatroom to target chatroom
+// in the manager's chatrooms map
+func (m *Manager) moveClientRoom(client *Client, chatroom string) {
+	m.Lock()
+	defer m.Unlock()
+	m.removeFromCurrentRoom(client)
+
+	if _, ok := m.chatrooms[chatroom]; !ok {
+		m.chatrooms[chatroom] = make(ClientList)
+	}
+
+	m.chatrooms[chatroom][client] = true
+	client.chatroom = chatroom
+}
+
+// close the client's connection and remove client from memory completely
 func (m *Manager) removeClient(client *Client) {
 	m.Lock()
 	defer m.Unlock()
+	m.removeFromCurrentRoom(client)
+	delete(m.clients, client)
+	client.connection.Close()
+}
 
-	if _, ok := m.clients[client]; ok {
-		client.connection.Close()
-		delete(m.clients, client)
+func (m *Manager) removeFromCurrentRoom(client *Client) {
+	room := client.chatroom
+	delete(m.chatrooms[room], client)
+	if len(m.chatrooms[room]) == 0 && room != startingRoom {
+		delete(m.chatrooms, room)
 	}
 }
 
 // return true to allow connection, false to dismiss
 func checkOrigin(r *http.Request) bool {
+	fmt.Println(r)
 	return true
 	origin := r.Header.Get("Origin")
 

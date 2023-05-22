@@ -18,14 +18,16 @@ type Client struct {
 	connection *websocket.Conn
 	manager    *Manager
 	egress     chan Event //egress to avoid concurrent writes
+	username   string
 	chatroom   string
 }
 
-func NewClient(conn *websocket.Conn, manager *Manager) *Client {
+func NewClient(conn *websocket.Conn, manager *Manager, username string) *Client {
 	c := &Client{
 		connection: conn,
 		manager:    manager,
 		egress:     make(chan Event),
+		username:   username,
 		chatroom:   startingRoom,
 	}
 

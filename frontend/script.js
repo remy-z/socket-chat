@@ -32,17 +32,18 @@ class ChangeRoomEvent {
 }
 
 
-class SendDirCommand {
+class SendDir {
     //user and chat are bool values 
-    constructor(chat, user) {
-        this.chat = chat;
-        this.user = user;
+    constructor(chats, users) {
+        this.chats = chats;
+        this.users = users;
     }
 }
 
-class RecieveDirCommand {
-    constructor(lines) {
-        this.lines = lines
+class RecieveDir {
+    constructor(users, chats) {
+        this.users = users;
+        this.chats = chats;
     }
 }
 
@@ -69,6 +70,9 @@ function routeEvent(event) {
             const messageEvent = Object.assign(new RecieveMessageEvent, event.payload);
             displayChatMessage(messageEvent)
             break;
+        case "recieve_dir_command":
+            const dirEvent = Object.assign(new RecieveMessageEvent, event.payload)
+        //display system message of list of directories
         default:
             alert("unsupported message type");
             break;
@@ -209,7 +213,26 @@ function cdCommand(args) {
 }
 
 function dirCommand(args) {
+    if (args.length > 2) {
+        displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
+        return
+    }
+    var chats = true
+    var users = true
 
+    if (args.length > 1) {
+        switch (args[1]) {
+            case "users":
+                chats = false;
+                break;
+            case "chats":
+                users = false;
+            default:
+                displaySystemMessage(`Invalid argument: ${args[1]}. Try /help DIR for more info.`)
+        }
+    }
+    var sendDir = new SendDir(chats, users)
+    sendEvent("send_dir", sendDir)
 }
 
 function sendMessage(message) {
@@ -251,7 +274,7 @@ function connectWebSocket(otp) {
     if (window["WebSocket"]) {
         console.log("supports websockets");
 
-        socket = new WebSocket("wss://" + document.location.host + "/ws?otp=" + otp)
+        socket = new WebSocket("wss://" + document.location.host + "/ws?otp=" + otp + "&username=" + username)
 
         socket.onopen = function (event) {
             console.log("socket-opened")

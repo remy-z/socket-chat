@@ -13,6 +13,8 @@ const (
 	EventSendMessage    = "send_message"
 	EventRecieveMessage = "recieve_message"
 	EventChangeRoom     = "change_room"
+	EventSendDir        = "send_dir"
+	EventRecieveDir     = "recieve_dir"
 )
 
 type Event struct {
@@ -34,4 +36,14 @@ type RecieveMessageEvent struct {
 
 type ChangeRoomEvent struct {
 	Name string `json:"name"`
+}
+
+type RecieveDirEvent struct {
+	Chats bool `json:"chats"`
+	Users bool `json:"users"`
+}
+
+type SendDirEvent struct {
+	Users []string       `json:"users"`
+	Chats map[string]int `json:"chats"`
 }
