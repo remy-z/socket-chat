@@ -44,7 +44,7 @@ body {
 }
 
 form#login-form {
-    grid-column: 4 / 7;
+    grid-column: 1 / 10;
     grid-row: 3 / 4;
     text-align: center;
 }

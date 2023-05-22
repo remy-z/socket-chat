@@ -1,5 +1,6 @@
 var selectedchat = "general";
 var username = "guest";
+var messageContainer = document.getElementById("message-container")
 
 // what we will be sending and recieveing trhough websocket
 class Event {
@@ -30,19 +31,32 @@ class ChangeRoomEvent {
     }
 }
 
-function changeChatRoom() {
-    // Change Header to reflect the Changed chatroom
-    var newchat = document.getElementById("chatroom");
-    if (newchat != null && newchat.value != selectedchat) {
-        selectedchat = newchat.value;
-        header = document.getElementById("chat-header").innerHTML = "Currently in chat: " + selectedchat;
 
+class SendDirCommand {
+    //user and chat are bool values 
+    constructor(chat, user) {
+        this.chat = chat;
+        this.user = user;
+    }
+}
+
+class RecieveDirCommand {
+    constructor(lines) {
+        this.lines = lines
+    }
+}
+
+function changeChatRoom(newchat) {
+    if (newchat != null && newchat.value != selectedchat) {
+        selectedchat = newchat;
+        document.getElementById("chatroom").innerHTML = selectedchat;
         let changeEvent = new ChangeRoomEvent(selectedchat);
         sendEvent("change_room", changeEvent);
-        textarea = document.getElementById("chatmessages");
-        textarea.innerHTML = `You changed room into: ${selectedchat}`;
+        while (messageContainer.firstChild) {
+            messageContainer.removeChild(messageContainer.firstChild)
+        }
+        displaySystemMessage(`Successfully changed rooms. Welcome to the ${selectedchat} chat`);
     }
-    return false;
 }
 
 function routeEvent(event) {
@@ -53,7 +67,7 @@ function routeEvent(event) {
     switch (event.type) {
         case "recieve_message":
             const messageEvent = Object.assign(new RecieveMessageEvent, event.payload);
-            appendChatMessage(messageEvent)
+            displayChatMessage(messageEvent)
             break;
         default:
             alert("unsupported message type");
@@ -62,10 +76,9 @@ function routeEvent(event) {
     }
 }
 
-function appendChatMessage(messageEvent) {
+function displayChatMessage(messageEvent) {
     var date = new Date().toLocaleString()
 
-    messageContainer = document.getElementById("message-container");
     message = messageBuilder(messageEvent.from, messageEvent.message, date);
     messageContainer.appendChild(message);
     messageContainer.scrollTop = messageContainer.scrollHeight;
@@ -99,7 +112,12 @@ function messageBuilder(from, message, date) {
     return div
 }
 
-function welcomeMessageBuilder() {
+function displaySystemMessage(message) {
+    var systemMessage = systemMessageBuilder(message)
+    messageContainer.appendChild(systemMessage)
+}
+
+function systemMessageBuilder(message) {
     var div = document.createElement('div');
     div.className = 'message';
 
@@ -109,7 +127,7 @@ function welcomeMessageBuilder() {
     var span = document.createElement('span');
     span.className = 'msg nameplate';
 
-    var messageText = document.createTextNode("Welcome to Socket-Chat!")
+    var messageText = document.createTextNode(message)
 
     p1.appendChild(span);
     p1.appendChild(messageText);
@@ -125,17 +143,80 @@ function sendEvent(eventName, payload) {
     socket.send(JSON.stringify(event))
 }
 
-function sendMessage() {
+function parseMessage() {
     input = document.getElementById("message-input");
-    var message = input;
+    var message = input.value
+    input.value = ""
+    if (message === "") {
+        return false
+    }
+    if (message.startsWith("/")) {
+        console.log("looks like a command")
+        args = message.substring(1).split(" ")
+        console.log(args)
+        switch (args[0]) {
+            case "cd":
+                console.log("cool directory")
+                return cdCommand(args)
+                break;
+            case "dir":
+                console.log("directing")
+                return dirCommand(args)
+            case "help":
+                console.log("helping")
+                return helpCommand(args)
+                break;
+            default:
+                return commandError(args)
+        }
+    } else {
+        sendMessage(message)
+    }
+
+    return false
+}
+
+
+function commandError(message) {
+    console.log(`${message}: command not recognized. /help for a list of available commands`)
+}
+
+function helpCommand(args) {
+    if (args.length > 1) {
+        switch (args[i]) {
+            case "cd":
+                //give info on cd command
+                break;
+            case "dir":
+                //give info on dir command
+                break;
+            case "help":
+                //give info on help command
+                break;
+            default:
+                commandError(args[i])
+        }
+    }
+}
+
+function cdCommand(args) {
+    if (args.length > 2) {
+        displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
+        return
+    }
+    chatroom = args[1].toLowerCase()
+    changeChatRoom(chatroom)
+}
+
+function dirCommand(args) {
+
+}
+
+function sendMessage(message) {
     if (message != null) {
-        //TODO allow username login 
-        let outgoingEvent = new SendMessageEvent(message.value, username);
+        let outgoingEvent = new SendMessageEvent(message, username);
         sendEvent("send_message", outgoingEvent)
     }
-    input.value = "";
-
-    return false;
 }
 
 function login() {
@@ -143,7 +224,10 @@ function login() {
         "username": document.getElementById("username").value,
         "password": document.getElementById("password").value
     }
-    username = formData["username"]
+
+
+    //add check to see if username already in use
+    username = formData["username"] == "" ? "guest" : formData["username"]
 
     fetch("login", {
         method: 'post',
@@ -193,10 +277,7 @@ function connectWebSocket(otp) {
 
 
 window.onload = function () {
-    //document.getElementById("chatroom-selection").onsubmit = changeChatRoom;
     document.getElementById("login-form").onsubmit = login;
-
-
     document.getElementById("username").focus()
 }
 
@@ -207,8 +288,8 @@ function loadChatPage() {
         elements[i].classList.toggle("hide");
     }
     //load messages 
-    messageContainer = document.getElementById("message-container")
-    messageContainer.appendChild(welcomeMessageBuilder())
+    displaySystemMessage("Welcome to Socket-Chat!")
+
     //focus on input
     input = document.getElementById("message-input")
     form = document.getElementById("send-message")
@@ -218,12 +299,13 @@ function loadChatPage() {
     input.addEventListener('keypress', function (event) {
         if (event.key === 'Enter') {
             event.preventDefault();
-            sendMessage()
+            parseMessage()
         }
     });
+
     form.addEventListener('submit', function (event) {
         event.preventDefault(); // Prevent form submission
-        sendMessage()
+        parseMessage()
         input.focus()
     });
 
