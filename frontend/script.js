@@ -1,6 +1,29 @@
 var selectedchat = "general";
 var username = "guest";
 var messageContainer = document.getElementById("message-container")
+var commandsUsed = {
+    "current": -1,
+    "commands": [],
+    tickUp: function () {
+        if (this.current < this.commands.length - 1) {
+            this.current += 1;
+        }
+    },
+    tickDown: function () {
+        if (this.current <= 0) {
+            return;
+        } else {
+            this.current -= 1;
+        }
+    },
+    changeInput: function (input) {
+        if (commandsUsed.commands.length > 0) {
+            input.value = commandsUsed.commands[commandsUsed.current]
+        } else {
+            input.value = ""
+        }
+    }
+}
 
 // what we will be sending and recieveing trhough websocket
 class Event {
@@ -116,8 +139,8 @@ function messageBuilder(from, message, date) {
 }
 
 function displayDirMessage(dirEvent) {
-    displaySystemMessage(`‎ ‎ Rooms and Users of WS:\\${selectedchat}`)
-    displaySystemMessage("")
+    displaySystemMessage(`    Rooms and Users of WS:\\${selectedchat}`)
+    displayEmptyLine()
     for (let key in dirEvent.rooms) {
         displaySystemMessage(`<ROOM>  ${key}  (${dirEvent.rooms[key]})`)
     }
@@ -132,20 +155,27 @@ function displaySystemMessage(message) {
     messageContainer.appendChild(systemMessage)
 }
 
-function systemMessageBuilder(message) {
+function displayEmptyLine() {
     var div = document.createElement('div');
     div.className = 'message';
 
     var p1 = document.createElement('p');
     p1.className = 'msg message-body';
 
-    var span = document.createElement('span');
-    span.className = 'msg nameplate';
+    br = document.createElement("br");
+    p1.appendChild(br);
+    div.appendChild(p1);
 
-    var messageText = document.createTextNode(message)
+    messageContainer.appendChild(div)
+}
 
-    p1.appendChild(span);
-    p1.appendChild(messageText);
+function systemMessageBuilder(message) {
+    var div = document.createElement('div');
+    div.className = 'message';
+
+    var p1 = document.createElement('p');
+    p1.className = 'msg message-body';
+    p1.textContent = message
 
     div.appendChild(p1);
 
@@ -166,9 +196,10 @@ function parseMessage() {
         return false
     }
     if (message.startsWith("/")) {
-        console.log("looks like a command")
+        commandsUsed.commands.unshift(message)
         command = message.substring(1).toLowerCase()
         args = command.split(" ")
+        displayEmptyLine()
         displaySystemMessage(`WS:\\${selectedchat}>${command}`)
         switch (args[0]) {
             case "cd":
@@ -178,12 +209,11 @@ function parseMessage() {
                 dirCommand(args)
                 break;
             case "help":
-                console.log("helping")
                 helpCommand(args)
                 break;
             case "cls":
-                console.log("clearing")
                 clsCommand()
+                break;
             default:
                 commandError(args[0])
         }
@@ -199,46 +229,75 @@ function commandError(message) {
     displaySystemMessage(`${message}: command not recognized. /help for a list of available commands`)
 }
 
+
 function helpCommand(args) {
-    if (args.length > 1) {
-        switch (args[i]) {
+    if (args.length > 2) {
+        displaySystemMessage("Invalid number of arguments. For info on a command, type /help command-name")
+        return
+    } if (args.length === 1) {
+        displaySystemMessage("For more information on a specific command, type /help command-name.")
+        displaySystemMessage("Commands must be preceed by a forward slash.")
+        displaySystemMessage("To use a command type /command-name")
+        displayEmptyLine()
+        displaySystemMessage("cd     Displays the name of or changes the current chatroom.")
+        displaySystemMessage("cls    Clears the screen.")
+        displaySystemMessage("dir    Displays a list of users and active chatrooms.")
+        displaySystemMessage("help   Provides help information.")
+    } else {
+        switch (args[1]) {
             case "cd":
-                //give info on cd command
+                displaySystemMessage("Displays the name of or changes the current chatroom.")
+                displayEmptyLine()
+                displaySystemMessage("cd [chatroom-name]")
+                displayEmptyLine()
+                displaySystemMessage("    chatroom-name - the name of the chatroom to change to.")
                 break;
             case "dir":
-                //give info on dir command
+                displaySystemMessage("Displays a list of users in current chatroom, and all active chatrooms.")
                 break;
             case "cls":
+                displaySystemMessage("Clears the screen.")
                 break;
             case "help":
-                //give info on help command
+                displaySystemMessage("Provides help information for commands.")
+                displayEmptyLine()
+                displaySystemMessage("help [command-name]")
+                displayEmptyLine()
+                displaySystemMessage("    command-name - displays help information on that command.")
                 break;
-
             default:
-                commandError(args[i])
+                displaySystemMessage(`${args[1]}: Invalid argument. Argument must be a valid command-name.`)
         }
     }
 }
 
 function cdCommand(args) {
     if (args.length > 2) {
-        displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
-        return
+        displaySystemMessage("Invalid number of arguments. For info on a command, try /help command-name");
+        return;
+    }
+    if (args.length === 1) {
+        displaySystemMessage(`WS:\\${selectedchat}`);
+        return;
     }
     chatroom = args[1].toLowerCase()
-    changeChatRoom(chatroom)
+    if (chatroom === "..") {
+        window.location.reload();
+        return
+    }
+    changeChatRoom(chatroom);
 }
 
 function dirCommand(args) {
     var rooms = true
     var users = true
     if (args.length > 1) {
-        displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
+        displaySystemMessage("Invalid number of arguments. For info on a command, try /help command-name")
         return
     }
     /*
     if (args.length > 2) {
-        displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
+        displaySystemMessage("Invalid number of arguments. For info on a command, try /help command-name")
         return
     }
     
@@ -300,7 +359,6 @@ function login() {
 
 function connectWebSocket(otp) {
     if (window["WebSocket"]) {
-        console.log("supports websockets");
 
         socket = new WebSocket("wss://" + document.location.host + "/ws?otp=" + otp + "&username=" + username)
 
@@ -340,6 +398,7 @@ function loadChatPage() {
     }
     //load messages 
     displaySystemMessage("Welcome to Socket-Chat!")
+    displaySystemMessage("Try sending messages, or /help for a list of available commands")
 
     //focus on input
     input = document.getElementById("message-input")
@@ -347,16 +406,25 @@ function loadChatPage() {
 
 
     // send message on enter keypress
-    input.addEventListener('keypress', function (event) {
-        if (event.key === 'Enter') {
+    input.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowUp') {
             event.preventDefault();
-            parseMessage()
+            commandsUsed.tickUp()
+            commandsUsed.changeInput(input)
+        } else if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            commandsUsed.tickDown()
+            commandsUsed.changeInput(input)
+        }
+        if (event.key === 'Escape') {
+            input.value = ""
         }
     });
 
     form.addEventListener('submit', function (event) {
         event.preventDefault(); // Prevent form submission
         parseMessage()
+        commandsUsed.current = -1
         input.focus()
     });
 

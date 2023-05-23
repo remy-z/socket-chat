@@ -17,6 +17,10 @@ body {
     font-family: 'Courier New', Courier, monospace;
 }
 
+p {
+    white-space: pre;
+}
+
 /*grid wrapper */
 .wrapper {
     height: 100%;
