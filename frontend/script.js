@@ -367,6 +367,7 @@ function connectWebSocket(otp) {
 
         socket.onclose = function (event) {
             console.log("socket-closed")
+            displaySystemMessage("You have been disconnected. Reload the page to reconnect")
         }
 
         socket.onmessage = function (event) {
