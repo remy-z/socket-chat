@@ -53,6 +53,12 @@ form#login-form {
     text-align: center;
 }
 
+#dev-info {
+    grid-column: 1 / 10;
+    grid-row: 9 / 10;
+    text-align: center;
+}
+
 input {
     font-family: 'Courier New', Courier, monospace;
 }
