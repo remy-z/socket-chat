@@ -335,8 +335,6 @@ function login() {
         "password": document.getElementById("password").value
     }
 
-
-    //add check to see if username already in use
     username = formData["username"] == "" ? "guest" : formData["username"]
 
     fetch("login", {
@@ -368,7 +366,6 @@ function connectWebSocket(otp) {
 
         socket.onclose = function (event) {
             console.log("socket-closed")
-            // add automatic recconection unless it was manually closed by server
         }
 
         socket.onmessage = function (event) {

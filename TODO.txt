@@ -1,0 +1,12 @@
+### FRONTEND ###
+[ ] - Handle displaying system messages better, using only one div/p element with linebreaks
+[ ] - Automatic reconnection to websocket if not manually closed by the server
+[ ] - characterlimit on usernames and chatrooms, restrict special characters
+
+### BACKEND ###
+[ ] - No duplicate usernames
+[ ] -  
+
+### POSSIBLE FEATURES ###
+[ ] - Private messaging between user and user
+[ ] - Password protected chatrooms

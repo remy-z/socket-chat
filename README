@@ -1,8 +1,11 @@
+https://socketchat.app
+
 A simple chatting application using websockets 
 
-make run 
+To try locally
+    make run 
+    and head to https://localhost/8080 to try it out locally
 
-and head to https://localhost/8080 to try it out
 
 currently there's no real authentification implemented, so to "login" just use 
 username: (anything you want)
