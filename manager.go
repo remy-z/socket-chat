@@ -264,10 +264,8 @@ func (m *Manager) removeFromCurrentRoom(client *Client) {
 func checkOrigin(r *http.Request) bool {
 
 	origin := r.Header.Get("Origin")
-	fmt.Println(origin)
-	return true
 	switch origin {
-	case "https://localhost:8080":
+	case "https://www.socketchat.app":
 		return true
 	default:
 		return false

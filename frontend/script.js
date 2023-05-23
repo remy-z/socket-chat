@@ -237,7 +237,8 @@ function helpCommand(args) {
     } if (args.length === 1) {
         displaySystemMessage("For more information on a specific command, type /help command-name.")
         displaySystemMessage("Commands must be preceed by a forward slash.")
-        displaySystemMessage("To use a command type /command-name")
+        displaySystemMessage("To use a command type /command-name.")
+        displaySystemMessage("Use arrow keys to cycle through previously used commands.")
         displayEmptyLine()
         displaySystemMessage("cd     Displays the name of or changes the current chatroom.")
         displaySystemMessage("cls    Clears the screen.")
