@@ -38,12 +38,12 @@ type ChangeRoomEvent struct {
 	Name string `json:"name"`
 }
 
-type RecieveDirEvent struct {
-	Chats bool `json:"chats"`
+type SendDirEvent struct {
 	Users bool `json:"users"`
+	Rooms bool `json:"rooms"`
 }
 
-type SendDirEvent struct {
+type RecieveDirEvent struct {
 	Users []string       `json:"users"`
-	Chats map[string]int `json:"chats"`
+	Rooms map[string]int `json:"rooms"`
 }

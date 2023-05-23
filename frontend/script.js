@@ -32,18 +32,18 @@ class ChangeRoomEvent {
 }
 
 
-class SendDir {
+class SendDirEvent {
     //user and chat are bool values 
-    constructor(chats, users) {
-        this.chats = chats;
+    constructor(users, rooms) {
         this.users = users;
+        this.rooms = rooms;
     }
 }
 
-class RecieveDir {
-    constructor(users, chats) {
+class RecieveDirEvent {
+    constructor(users, rooms) {
         this.users = users;
-        this.chats = chats;
+        this.rooms = rooms;
     }
 }
 
@@ -53,9 +53,7 @@ function changeChatRoom(newchat) {
         document.getElementById("chatroom").innerHTML = selectedchat;
         let changeEvent = new ChangeRoomEvent(selectedchat);
         sendEvent("change_room", changeEvent);
-        while (messageContainer.firstChild) {
-            messageContainer.removeChild(messageContainer.firstChild)
-        }
+        clearChats()
         displaySystemMessage(`Successfully changed rooms. Welcome to the ${selectedchat} chat`);
     }
 }
@@ -70,9 +68,10 @@ function routeEvent(event) {
             const messageEvent = Object.assign(new RecieveMessageEvent, event.payload);
             displayChatMessage(messageEvent)
             break;
-        case "recieve_dir_command":
-            const dirEvent = Object.assign(new RecieveMessageEvent, event.payload)
-        //display system message of list of directories
+        case "recieve_dir":
+            const dirEvent = Object.assign(new RecieveDirEvent, event.payload)
+            displayDirMessage(dirEvent)
+            break;
         default:
             alert("unsupported message type");
             break;
@@ -81,7 +80,7 @@ function routeEvent(event) {
 }
 
 function displayChatMessage(messageEvent) {
-    var date = new Date().toLocaleString()
+    var date = new Date(messageEvent.sent).toLocaleString()
 
     message = messageBuilder(messageEvent.from, messageEvent.message, date);
     messageContainer.appendChild(message);
@@ -114,6 +113,18 @@ function messageBuilder(from, message, date) {
     div.appendChild(p2);
 
     return div
+}
+
+function displayDirMessage(dirEvent) {
+    displaySystemMessage(`‎ ‎ Rooms and Users of WS:\\${selectedchat}`)
+    displaySystemMessage("")
+    for (let key in dirEvent.rooms) {
+        displaySystemMessage(`<ROOM>  ${key}  (${dirEvent.rooms[key]})`)
+    }
+    for (i = 0; i < dirEvent.users.length; i++) {
+        displaySystemMessage(`<USER>  ${dirEvent.users[i]}`)
+    }
+
 }
 
 function displaySystemMessage(message) {
@@ -156,22 +167,25 @@ function parseMessage() {
     }
     if (message.startsWith("/")) {
         console.log("looks like a command")
-        args = message.substring(1).split(" ")
-        console.log(args)
+        command = message.substring(1).toLowerCase()
+        args = command.split(" ")
+        displaySystemMessage(`WS:\\${selectedchat}>${command}`)
         switch (args[0]) {
             case "cd":
-                console.log("cool directory")
-                return cdCommand(args)
+                cdCommand(args)
                 break;
             case "dir":
-                console.log("directing")
-                return dirCommand(args)
+                dirCommand(args)
+                break;
             case "help":
                 console.log("helping")
-                return helpCommand(args)
+                helpCommand(args)
                 break;
+            case "cls":
+                console.log("clearing")
+                clsCommand()
             default:
-                return commandError(args)
+                commandError(args[0])
         }
     } else {
         sendMessage(message)
@@ -182,7 +196,7 @@ function parseMessage() {
 
 
 function commandError(message) {
-    console.log(`${message}: command not recognized. /help for a list of available commands`)
+    displaySystemMessage(`${message}: command not recognized. /help for a list of available commands`)
 }
 
 function helpCommand(args) {
@@ -194,9 +208,12 @@ function helpCommand(args) {
             case "dir":
                 //give info on dir command
                 break;
+            case "cls":
+                break;
             case "help":
                 //give info on help command
                 break;
+
             default:
                 commandError(args[i])
         }
@@ -213,26 +230,37 @@ function cdCommand(args) {
 }
 
 function dirCommand(args) {
+    var rooms = true
+    var users = true
+    if (args.length > 1) {
+        displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
+        return
+    }
+    /*
     if (args.length > 2) {
         displaySystemMessage("Invalid number of arguments. For info on a command, try /help [command-name]")
         return
     }
-    var chats = true
-    var users = true
+    
 
     if (args.length > 1) {
         switch (args[1]) {
             case "users":
-                chats = false;
+                rooms = false;
                 break;
-            case "chats":
+            case "rooms":
                 users = false;
             default:
-                displaySystemMessage(`Invalid argument: ${args[1]}. Try /help DIR for more info.`)
+                displaySystemMessage(`Invalid argument: ${args[1]}. Try /help dir for more info.`)
         }
     }
-    var sendDir = new SendDir(chats, users)
-    sendEvent("send_dir", sendDir)
+    */
+    var sendDirEvent = new SendDirEvent(rooms, users)
+    sendEvent("send_dir", sendDirEvent)
+}
+
+function clsCommand(args) {
+    clearChats()
 }
 
 function sendMessage(message) {
@@ -333,5 +361,11 @@ function loadChatPage() {
     });
 
     input.focus()
+}
+
+function clearChats() {
+    while (messageContainer.firstChild) {
+        messageContainer.removeChild(messageContainer.firstChild)
+    }
 }
 

@@ -20,6 +20,7 @@ type Client struct {
 	egress     chan Event //egress to avoid concurrent writes
 	username   string
 	chatroom   string
+	joined     time.Time
 }
 
 func NewClient(conn *websocket.Conn, manager *Manager, username string) *Client {
@@ -29,6 +30,7 @@ func NewClient(conn *websocket.Conn, manager *Manager, username string) *Client 
 		egress:     make(chan Event),
 		username:   username,
 		chatroom:   startingRoom,
+		joined:     time.Now(),
 	}
 
 	c.setupClient()

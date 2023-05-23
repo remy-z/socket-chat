@@ -123,18 +123,43 @@ func SendDirHandler(event Event, c *Client) error {
 		return fmt.Errorf("bad payload in request: %v", err)
 	}
 
-	//var users []string
-	//var chats map[string]int
+	chatrooms := c.manager.chatrooms
+
+	rooms := map[string]int{}
+
+	for chatroom := range chatrooms {
+		rooms[chatroom] = len(chatrooms[chatroom])
+	}
+
+	var users []string
+	for client := range chatrooms[c.chatroom] {
+		users = append(users, client.username)
+	}
+
+	var dirMessage RecieveDirEvent
+	dirMessage.Rooms = rooms
+	dirMessage.Users = users
+
+	data, err := json.Marshal(dirMessage)
+	if err != nil {
+		return fmt.Errorf("failed to marshal dir message: %v", err)
+	}
+	fmt.Println(dirMessage)
+	outgoingEvent := Event{
+		Payload: data,
+		Type:    EventRecieveDir,
+	}
+	c.egress <- outgoingEvent
 
 	return nil
 }
 
 // http request handler for /ws, upgrades connection to websocket
 func (m *Manager) serveWS(w http.ResponseWriter, r *http.Request) {
-	//verify OTP
 	urlMap := r.URL.Query()
-
 	otp, username := urlMap.Get("otp"), urlMap.Get("username")
+
+	//verify OTP
 	if otp == "" {
 		w.WriteHeader(http.StatusUnauthorized)
 		return
@@ -215,6 +240,7 @@ func (m *Manager) moveClientRoom(client *Client, chatroom string) {
 
 	m.chatrooms[chatroom][client] = true
 	client.chatroom = chatroom
+	client.joined = time.Now()
 }
 
 // close the client's connection and remove client from memory completely
@@ -236,10 +262,10 @@ func (m *Manager) removeFromCurrentRoom(client *Client) {
 
 // return true to allow connection, false to dismiss
 func checkOrigin(r *http.Request) bool {
-	fmt.Println(r)
-	return true
-	origin := r.Header.Get("Origin")
 
+	origin := r.Header.Get("Origin")
+	fmt.Println(origin)
+	return true
 	switch origin {
 	case "https://localhost:8080":
 		return true
