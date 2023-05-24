@@ -2,11 +2,17 @@
 [ ] - Handle displaying system messages better, using only one div/p element with linebreaks
 [ ] - Automatic reconnection to websocket if not manually closed by the server
 [ ] - characterlimit on usernames and chatrooms, restrict special characters
+[ ] - text wrapping on messages
+[ ] - change color on github link
+[ ] - formatting of /dir to make more clear what's happening (which items are users vs rooms)
+[ ] - change names of commands to something that makes sense for chat (cr instead of cd maybe, etc.)
 
 ### BACKEND ###
 [ ] - No duplicate usernames
-[ ] -  
+[ ] - Rate limiting for clients sending messages too fast
 
 ### POSSIBLE FEATURES ###
 [ ] - Private messaging between user and user
 [ ] - Password protected chatrooms
+[ ] - Split up big messages into chunks
+[ ] - rsa encryption 
