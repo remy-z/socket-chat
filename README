@@ -1,6 +1,6 @@
 https://socketchat.app
 
-A simple chatting application using websockets 
+A chatting application using websockets 
 
 To try locally
     make run 
